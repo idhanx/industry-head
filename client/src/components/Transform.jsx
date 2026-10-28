@@ -64,12 +64,9 @@ export default function Transform() {
               <span className="eyebrow">The transformation</span>
               <h2 id="xf-h">From registers and WhatsApp to a live factory.</h2>
             </div>
-            <div className="xform-state" aria-hidden="true"><span className={after ? undefined : "on"}>Without Industryhead</span><span className={after ? "on" : undefined}>With Industryhead</span></div>
           </div>
 
           <div className="stage" ref={stage} role="group" aria-label="Before and after comparison. Use the slider below to move between the two.">
-            <span className="tag-b">Without Industryhead</span>
-            <span className="tag-a">With Industryhead</span>
 
             <div className="layer-before" aria-hidden="true">
               <div className="reg">
@@ -146,9 +143,8 @@ export default function Transform() {
               ))}
             </div>
             <div className="xform-ctl" style={{ marginTop: 12 }}>
-              <label htmlFor="xRange">Before</label>
+              <label htmlFor="xRange" className={`xr-state${after ? " with" : ""}`}><span key={after ? "with" : "without"}>{after ? "With Industryhead" : "Without Industryhead"}</span></label>
               <input type="range" id="xRange" min="0" max="100" step="1" value={snap.pct} onChange={onRange} aria-valuetext={`${snap.pct}% transformed`} aria-label="Transformation progress: before to after" />
-              <label htmlFor="xRange">After</label>
             </div>
           </div>
         </div>

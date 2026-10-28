@@ -720,8 +720,8 @@ th.fh .fc-cov i { background: var(--gold); }
   .tab-ind i.run { transform: none; }
 }
 
-/* transformation: the longer "Without Industryhead" label must not collide with "With Industryhead" on small screens */
-@media (max-width: 640px) {
-  .tag-b, .tag-a { font-size: .58rem; letter-spacing: .05em; padding: 5px 9px; top: 10px; }
-  .tag-a { left: 10px; } .tag-b { right: 10px; }
-}
+/* transformation: one label at the left of the scroll slider — "Without Industryhead" until the scroll passes halfway, then "With Industryhead" */
+.xr-state { flex: 0 0 auto; min-width: 12.5em; font: 600 .78rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: #C9B98A; transition: color .4s; }
+.xr-state.with { color: var(--gold); }
+.xr-state span { display: inline-block; animation: wordin .45s var(--ease) both; }
+@media (max-width: 640px) { .xr-state { min-width: 11em; font-size: .68rem; letter-spacing: .05em; } }
