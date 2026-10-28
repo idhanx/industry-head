@@ -110,11 +110,12 @@ function Showcase() {
           </div>
         </div>
         <div className="show-foot">
+          <p className="show-cap" aria-live="off"><b>{String(idx + 1).padStart(2, "0")}</b><span key={idx}>{NAMES[idx]}</span></p>
           <div className="segs" onAnimationEnd={(e) => { if (e.animationName === "segfill" && !userPaused) go(idx + 1); }}>
             {NAMES.map((t, k) => (
               <button key={t} type="button" className={`seg${k < idx ? " done" : ""}${k === idx ? " on" : ""}${k === idx && userPaused && reduced ? " static" : ""}`}
-                style={{ "--dur": DUR + "ms" }} aria-label={`Show slide ${k + 1}: ${t}`} aria-current={k === idx ? "true" : undefined} onClick={() => go(k)}>
-                <span>{t}</span><span className="bar-t"><i></i></span>
+                style={{ "--dur": DUR + "ms" }} aria-label={`Show slide ${k + 1}: ${t}`} title={t} aria-current={k === idx ? "true" : undefined} onClick={() => go(k)}>
+                <span className="bar-t"><i></i></span>
               </button>
             ))}
           </div>

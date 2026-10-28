@@ -253,10 +253,6 @@ footer { border-top: 1px solid var(--ink); padding-bottom: 0; overflow: hidden; 
 }
 @media (prefers-reduced-motion: reduce) { .pl-tab h3, .pl-tab p, .ind { transition: none !important; } }
 
-/* showcase: keep the slide labels readable */
-.seg { letter-spacing: .03em; font-size: .6rem; }
-.seg span:first-child { overflow: visible; text-overflow: clip; }
-@media (max-width: 1180px) { .seg span:first-child { display: none; } }
 
 /* =====================================================================
    Round 2 — product tour alignment, comparison table, improvement journey
@@ -725,3 +721,20 @@ th.fh .fc-cov i { background: var(--gold); }
 .xr-state.with { color: var(--gold); }
 .xr-state span { display: inline-block; animation: wordin .45s var(--ease) both; }
 @media (max-width: 640px) { .xr-state { min-width: 11em; font-size: .68rem; letter-spacing: .05em; } }
+
+/* ---- hero showcase footer: one caption, five clean bars, controls ---- */
+.show-foot { display: grid; grid-template-columns: minmax(8.5em, auto) minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 14px clamp(14px, 1.8vw, 22px); }
+.show-cap { margin: 0; display: flex; align-items: baseline; gap: 10px; min-width: 0; font: 600 .76rem/1.2 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+.show-cap b { font: 500 .7rem var(--f-mono); letter-spacing: .06em; color: var(--gold); }
+.show-cap span { animation: wordin .45s var(--ease) both; overflow: hidden; text-overflow: ellipsis; }
+.segs { gap: 8px; align-items: center; }
+.seg { padding: 12px 0; min-width: 0; }
+.seg .bar-t { height: 3px; }
+.seg:hover .bar-t { background: rgba(255,255,255,.3); }
+.show-ctl { gap: 8px; }
+@media (max-width: 640px) {
+  .show-foot { grid-template-columns: minmax(0, 1fr) auto; row-gap: 4px; }
+  .show-cap { grid-column: 1; grid-row: 1; font-size: .7rem; }
+  .show-ctl { grid-column: 2; grid-row: 1; }
+  .segs { grid-column: 1 / -1; grid-row: 2; }
+}
