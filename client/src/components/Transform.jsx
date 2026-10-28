@@ -64,11 +64,11 @@ export default function Transform() {
               <span className="eyebrow">The transformation</span>
               <h2 id="xf-h">From registers and WhatsApp to a live factory.</h2>
             </div>
-            <div className="xform-state" aria-hidden="true"><span className={after ? undefined : "on"}>Before</span><span className={after ? "on" : undefined}>With Industryhead</span></div>
+            <div className="xform-state" aria-hidden="true"><span className={after ? undefined : "on"}>Without Industryhead</span><span className={after ? "on" : undefined}>With Industryhead</span></div>
           </div>
 
           <div className="stage" ref={stage} role="group" aria-label="Before and after comparison. Use the slider below to move between the two.">
-            <span className="tag-b">Before</span>
+            <span className="tag-b">Without Industryhead</span>
             <span className="tag-a">With Industryhead</span>
 
             <div className="layer-before" aria-hidden="true">
