@@ -1,0 +1,11 @@
+node_modules/
+client/dist/
+server/data/
+.env
+.env.*
+!.env.example
+.vercel/
+*.log
+.DS_Store
+# working briefs / superseded drafts used while designing (not part of the app)
+uses/

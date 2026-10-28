@@ -1,0 +1,26 @@
+{
+  "name": "industryhead",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Industryhead — React client and Node/Express API (deployable on Vercel)",
+  "engines": { "node": "22.x" },
+  "scripts": {
+    "install:all": "npm install && npm install --prefix client",
+    "dev": "concurrently -k -n api,web -c yellow,cyan \"npm run dev:api\" \"npm run dev --prefix client\"",
+    "dev:api": "node --watch --no-warnings server/src/index.js",
+    "build": "npm run build --prefix client",
+    "start": "npm run build && NODE_ENV=production node --no-warnings server/src/index.js",
+    "test": "node --no-warnings --test server/test/"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "concurrently": "^9.1.0"
+  }
+}

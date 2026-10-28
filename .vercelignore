@@ -1,0 +1,5 @@
+uses/
+server/data/
+node_modules/
+client/node_modules/
+*.log

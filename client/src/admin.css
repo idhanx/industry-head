@@ -1,0 +1,28 @@
+/* form extras + admin page */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.field-err { display: block; margin-top: 2px; font: 500 .8rem var(--f-body); color: var(--stop); }
+.demo-form input[aria-invalid="true"], .demo-form select[aria-invalid="true"], .demo-form textarea[aria-invalid="true"] { border-color: var(--stop); }
+.demo-form .btn[disabled] { opacity: .7; pointer-events: none; }
+.status-bar { position: fixed; inset: auto 0 0 0; }
+
+.adm { min-height: 100vh; background: var(--paper); }
+.adm-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 14px var(--gutter); border-bottom: 1px solid var(--line); background: #fff; }
+.adm-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.adm-main { width: min(1240px, 100% - 2 * var(--gutter)); margin: 32px auto 64px; }
+.adm h1 { font-size: 1.6rem; }
+.adm-login { max-width: 420px; margin: 8vh auto; display: grid; gap: 14px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow); }
+.adm-login label, .adm-filter { display: grid; gap: 6px; font: 600 .84rem var(--f-display); color: var(--ink); }
+.adm-login input, .adm-filter select { min-height: 44px; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--line-2); font: 400 .95rem var(--f-body); background: #fff; }
+.adm-bar { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.adm-count { font: 600 .9rem var(--f-mono); color: var(--teal); background: var(--teal-50); padding: 3px 10px; border-radius: 99px; vertical-align: middle; }
+.adm-empty { padding: 40px; text-align: center; color: var(--muted); background: #fff; border: 1px dashed var(--line-2); border-radius: var(--radius); }
+.adm-table { overflow-x: auto; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+.adm-table table { width: 100%; min-width: 880px; border-collapse: collapse; font-size: .9rem; }
+.adm-table th, .adm-table td { padding: 14px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.adm-table thead th { background: #F6F2E6; font: 700 .76rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.adm-table tr:last-child td { border-bottom: 0; }
+.adm-table small { color: var(--muted); }
+.adm-table a { color: var(--teal); }
+.st { min-height: 38px; padding: 4px 10px; border-radius: 99px; border: 1.5px solid var(--line-2); font: 600 .82rem var(--f-body); text-transform: capitalize; background: #fff; }
+.st-new { border-color: var(--gold-deep); background: rgba(235,201,88,.2); }
+.st-contacted { border-color: var(--teal); } .st-scheduled { border-color: var(--run); background: rgba(23,166,115,.12); } .st-closed { color: var(--muted); }
