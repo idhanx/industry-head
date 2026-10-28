@@ -27,7 +27,7 @@ Without `DATABASE_URL` the API stores data in a local SQLite file (`server/data/
 
 1. **Import** `idhanx/industry-head` in Vercel. The framework preset can stay *Other*; `vercel.json` sets the install/build commands and the
    output directory (`client/dist`). Node 22 is selected from `package.json`.
-2. **Add a Postgres database** (Vercel → Storage → *Neon* or any Postgres) and make sure `DATABASE_URL` is set for the project.
+2. **Add a Postgres database** (Vercel → Storage → *Neon* or any Postgres) and make sure `DATABASE_URL` (or `POSTGRES_URL`) is set for the project — the integration usually adds it for you.
    Tables are created on first use.
 3. **Set environment variables** (Production + Preview): `DATABASE_URL` and `ADMIN_TOKEN` (a long random string). See `.env.example`.
 4. Deploy. The site is served from the CDN; `/api/*` runs as a serverless function; `/admin` is the enquiries dashboard.

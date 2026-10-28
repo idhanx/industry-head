@@ -124,7 +124,8 @@ export function unconfiguredStore() {
 
 /** Picks the store from the environment. */
 export async function storeFromEnv(env = process.env) {
-  if (env.DATABASE_URL) return pgPoolStore(env.DATABASE_URL);
+  const url = env.DATABASE_URL || env.POSTGRES_URL; // Neon / Vercel Postgres integrations set one or both
+  if (url) return pgPoolStore(url);
   if (env.VERCEL) return unconfiguredStore();
   return sqliteStore(env.DB_PATH || new URL("../data/industryhead.db", import.meta.url).pathname);
 }
