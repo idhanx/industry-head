@@ -25,8 +25,10 @@ export default function Method({ stages }) {
             </button>
           ))}
         </Reveal>
+        <div className="mt-loop" aria-hidden="true"><span>↺ back to Visualise</span></div>
         <Reveal className={`mt-panel${reduced ? "" : " swap"}`} id="mtPanel" role="tabpanel" aria-labelledby={`mt-tab-${i}`} tabIndex={0}>
           <div className="mt-copy" key={"c" + i}>
+            <span className="mt-ghost" aria-hidden="true">{pad(i + 1)}</span>
             <span className="eyebrow">{pad(i + 1)} · {d.name}</span>
             <h3>{d.title}</h3>
             <p>{d.description}</p>

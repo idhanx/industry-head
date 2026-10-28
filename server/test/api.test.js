@@ -32,6 +32,9 @@ for (const [name, make] of stores) {
     test("content endpoint serves the layers, stages, chain and comparison", async () => {
       const c = await (await s.j("/api/content")).json();
       assert.equal(c.features.length, 6); assert.equal(c.stages.length, 6); assert.equal(c.chain.length, 8); assert.equal(c.comparison.rows.length, 11);
+      assert.ok(c.comparison.rows.every((r) => r.cells.length === 5 && r.cells[0].l === 2 && r.cells.every((k) => [0, 1, 2].includes(k.l))));
+      assert.equal(c.comparison.coverage[0], 1); assert.ok(c.comparison.coverage.slice(1).every((v) => v > 0 && v < 1));
+      assert.equal(c.services.length, 8); assert.ok(c.services.every((v) => v.icon));
     });
 
     test("enquiry: valid submission is stored; admin can list and update it", async () => {

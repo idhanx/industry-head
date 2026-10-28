@@ -30,6 +30,10 @@ export const chain = [
   ["Cost & learning", "Impact, verified outcomes and better future plans."]
 ].map(([title, text], i) => ({ n: String(i + 1).padStart(2, "0"), title, text }));
 
+// How fully each category typically covers a need: 2 = built in, 1 = partly / varies by product, 0 = not typical.
+// Order per row: OEE dashboards, Registers/Excel/WhatsApp, ERP add-ons, Sensor-first OEE/MES. Illustrative, not a vendor audit.
+const LEVELS = [[1, 1, 1, 0], [2, 1, 1, 2], [1, 0, 1, 1], [1, 1, 0, 1], [1, 0, 1, 1], [1, 0, 1, 1], [1, 0, 1, 1], [1, 1, 1, 1], [0, 1, 1, 1], [1, 0, 1, 1], [1, 0, 1, 1]];
+
 export const comparison = {
   lanes: {
     oee: { label: "Equipment visibility", title: ["OEE", "dashboards"], question: "“What happened?”", purpose: "Make machine performance and production losses visible.", steps: [["Capture", "machine data"], ["Measure", "OEE and losses"], ["Report", "trends and alerts"]], outcome: "See the performance." },
@@ -54,7 +58,7 @@ export const comparison = {
   ],
   rows: [
     ["Start without wiring every machine", "✓", "Tablet / phone capture; add IoT per machine", "Manual or connected data, depending on product", "Easy to start; updates entered by people", "Manual entries or integrations", "Machine connection often central to rollout"],
-    ["See equipment performance and production losses", "✓", "OEE and losses within the wider factory context", "<strong>Core purpose:</strong> availability, performance and quality", "Calculated in sheets and registers", "Depends on production modules", "Connected production and machine visibility"],
+    ["See equipment performance and production losses", "✓", "OEE and losses within the wider factory context", "Core purpose: availability, performance and quality", "Calculated in sheets and registers", "Depends on production modules", "Connected production and machine visibility"],
     ["Translate losses into ₹ and prioritise the response", "✓", "Link loss impact to priorities; avoid double-counting costs", "Loss rankings; financial models vary", "Manual costing and prioritisation", "Cost and variance reporting; granularity varies", "Loss costing and prioritisation vary by platform"],
     ["Floor screens in Hindi and Tamil", "✓", "Hindi and Tamil in the proposed floor experience", "Language support varies", "Depends on the team’s documents", "Depends on product and localisation", "Language support varies"],
     ["A morning meeting driven by factory priorities", "✓", "Connect losses, priorities, decisions and follow-up", "Reports and alerts inform the meeting", "Agenda assembled manually", "Reports inform the meeting; workflow varies", "Daily management features vary"],
@@ -64,9 +68,11 @@ export const comparison = {
     ["Turn improvement into standards and capability", "✓", "Kaizen, Skills, SOPs and Audits connected in Core", "May need wider modules or connected tools", "Templates, documents and manual training logs", "Depends on quality and learning modules", "Work instructions and skills features vary"],
     ["Extend into specialist workflows", "↗", "Specialist workflows tailored to your factory’s needs", "Extensions and integrations vary", "Additional sheets or standalone tools", "Module and integration ecosystems", "Module and integration ecosystems"],
     ["Implementation supported by manufacturing expertise", "✓", "Manufacturing-led onboarding and improvement coaching in the proposed offer", "Support model depends on provider", "Usually organised internally", "Vendor or implementation partner", "Vendor or implementation partner"]
-  ].map(([need, mark, ...cells]) => ({ need, mark, cells })),
+  ].map(([need, mark, ...cells], i) => ({ need, mark, cells: cells.map((t, c) => ({ t, l: c === 0 ? 2 : LEVELS[i][c - 1] })) })),
   note: "Illustrative workflow and category comparison, not a vendor-by-vendor audit. Capabilities overlap and vary by product. Industryhead reflects the proposed product scope; end-to-end performance requires factory validation."
 };
+
+comparison.coverage = comparison.columns.map((_, c) => +(comparison.rows.reduce((n, r) => n + r.cells[c].l, 0) / (2 * comparison.rows.length)).toFixed(3));
 
 export const industries = [
   ["Auto components", "Tier-1 and Tier-2 suppliers under OTIF and PPM pressure.", "OTIF · 8D · traceability"],
@@ -79,6 +85,7 @@ export const industries = [
   ["Multi-plant groups", "Owners comparing plants on one definition of loss.", "Benchmark · roles"]
 ].map(([title, text, tag]) => ({ title, text, tag }));
 
+const ICONS = ["layers", "users", "calendar", "rupee", "wrench", "shield", "loop", "chip"];
 export const services = [
   ["Plant onboarding", "Machines, parts, routings, rates, shifts and customer rules loaded from simple templates — your plant mapped before go-live."],
   ["Floor training", "Operators, supervisors and inspectors trained on the tablet screens in their own language, on their own machines."],
@@ -88,7 +95,7 @@ export const services = [
   ["Quality problem solving", "8D, root cause and cost of poor quality, with customer complaints tracked to closure."],
   ["Lean & Kaizen programmes", "Idea schemes, skills matrices and improvement events — with savings verified, not claimed."],
   ["IoT pilot", "When you are ready: sensors or PLC signals mapped to machines for measured run time and counts."]
-].map(([title, text], i) => ({ k: "S-0" + (i + 1), title, text }));
+].map(([title, text], i) => ({ k: "S-0" + (i + 1), icon: ICONS[i], title, text }));
 
 export const steps = [
   ["Map the plant", "We collect your machines, parts, routings, rates and shifts in ready-made templates and load your history."],

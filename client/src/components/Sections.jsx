@@ -1,4 +1,6 @@
+import { cloneElement, useState } from "react";
 import { Reveal } from "../hooks/useReveal.jsx";
+import { useReduced } from "../hooks/useReduced.js";
 
 const TRUST_ICONS = {
   lock: <><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></>,
@@ -20,7 +22,35 @@ export function Industries({ items }) {
   );
 }
 
+const SVC_ICONS = {
+  layers: <><path d="M12 3l9 5-9 5-9-5 9-5z" /><path d="M3 12.5l9 5 9-5" /><path d="M3 17l9 5 9-5" /></>,
+  users: <><circle cx="9" cy="8" r="3.2" /><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1" /><circle cx="17.5" cy="9" r="2.4" /><path d="M17 14.2a4 4 0 0 1 4 4V20" /></>,
+  calendar: <><rect x="3.5" y="5" width="17" height="15" rx="2" /><path d="M3.5 10h17M8 3v4M16 3v4M9 15l2 2 4-4" /></>,
+  rupee: <><path d="M6 4h12M6 9h12M14 4c3 0 4 2.5 4 5s-1 5-4 5H6l8 7" /></>,
+  wrench: <><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></>,
+  shield: <><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M9 12l2 2 4-4" /></>,
+  loop: <><path d="M17 2l4 4-4 4" /><path d="M3 11V9a3 3 0 0 1 3-3h15" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a3 3 0 0 1-3 3H3" /></>,
+  chip: <><rect x="6" y="6" width="12" height="12" rx="2" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" /><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" /></>
+};
+
+/** SVG shapes drawn on with pathLength=1 so the icon traces itself (see .svc-draw in editorial.css). */
+function SvcIcon({ name, className }) {
+  const shapes = SVC_ICONS[name];
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {Array.isArray(shapes.props.children) ? shapes.props.children.map((c, i) => cloneElement(c, { key: i, pathLength: 1 })) : cloneElement(shapes.props.children, { pathLength: 1 })}
+    </svg>
+  );
+}
+
 export function Services({ items }) {
+  const reduced = useReduced();
+  const [idx, setIdx] = useState(0);
+  const [auto, setAuto] = useState(true);       // stops for good once the visitor picks a service
+  const [hold, setHold] = useState(false);      // hover / focus pauses the countdown
+  const n = items.length, cur = items[idx];
+  const running = auto && !reduced;
+  const pick = (i) => { setIdx(i); setAuto(false); };
   return (
     <section className="services" id="services">
       <div className="wrap">
@@ -29,8 +59,32 @@ export function Services({ items }) {
           <h2>Software, plus the people who make it <em>stick.</em></h2>
           <p className="lead">We don't just install Industryhead. We set it up on your data, train your floor and coach the habits that turn numbers into savings.</p>
         </Reveal>
-        <div className="svc">
-          {items.map((x, k) => <Reveal as="article" delay={d(k)} key={x.k}><span className="k">{x.k}</span><h3>{x.title}</h3><p>{x.text}</p></Reveal>)}
+        <div className="svc-split" onPointerEnter={(e) => e.pointerType === "mouse" && setHold(true)} onPointerLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}>
+          <Reveal className="svc-stage" aria-hidden="true">
+            <div className="svc-disc">
+              <svg className="svc-ring" viewBox="0 0 120 120">
+                <circle className="trk" cx="60" cy="60" r="56" />
+                <circle key={idx + (running ? "r" : "s")} className={`bar${running ? "" : " idle"}${hold ? " held" : ""}`} cx="60" cy="60" r="56" pathLength="1"
+                  onAnimationEnd={(e) => { if (e.animationName === "svc-count" && running) setIdx((i) => (i + 1) % n); }} />
+              </svg>
+              <SvcIcon key={cur.icon} name={cur.icon} className="svc-ic" />
+            </div>
+            <p className="svc-count"><b key={idx}>{String(idx + 1).padStart(2, "0")}</b><span> / {String(n).padStart(2, "0")}</span></p>
+            <p className="svc-now" key={"n" + idx}>{cur.title}</p>
+          </Reveal>
+          <ul className="svc-list">
+            {items.map((x, k) => (
+              <Reveal as="li" className={`svc-item${k === idx ? " open" : ""}`} delay={(k % 8) * 0.05} key={x.k}>
+                <button type="button" className="svc-head" aria-expanded={k === idx} aria-controls={`svc-b-${k}`} id={`svc-h-${k}`} onClick={() => pick(k)}>
+                  <span className="k">{x.k}</span>
+                  <SvcIcon name={x.icon} className="svc-mini" />
+                  <h3>{x.title}</h3>
+                  <span className="plus" aria-hidden="true"></span>
+                </button>
+                <div className="svc-body" id={`svc-b-${k}`} role="region" aria-labelledby={`svc-h-${k}`}><div><p>{x.text}</p></div></div>
+              </Reveal>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

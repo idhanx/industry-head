@@ -2,6 +2,62 @@ import { useEffect, useState } from "react";
 import { Reveal, useInView } from "../hooks/useReveal.jsx";
 import { useReduced } from "../hooks/useReduced.js";
 
+const LEVEL_NAME = ["Not typical", "Partly / varies", "Built in"];
+
+function Glyph({ level, mark, label }) {
+  return (
+    <span className={`fc-g l${level}`} role="img" aria-label={`${label}: ${LEVEL_NAME[level]}`}>
+      {level === 2 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{mark === "↗" ? <path d="M7 17L17 7M9 7h8v8" /> : <path d="M5 12.5l4.5 4.5L19 7.5" />}</svg>}
+    </span>
+  );
+}
+
+/** Visual comparison: a coverage meter per approach and a mark per need — the difference reads at a glance. */
+function Matrix({ data, active }) {
+  const [ref, seen] = useInView({ threshold: 0.01, rootMargin: "0px 0px -12% 0px" }); // tall on phones, so never ask for a share of its height
+  const on = seen && active;
+  const n = data.rows.length;
+  return (
+    <div className={`fc-matrix${on ? " seen" : ""}`} ref={ref}>
+      <table>
+        <caption className="sr">Industryhead compared with four other approaches across {n} plant needs. Each cell shows a mark for whether the need is built in, partly covered or not typical for that approach, with the detail in words.</caption>
+        <colgroup><col className="c-need" /><col className="c-fh" /><col /><col /><col /><col /></colgroup>
+        <thead>
+          <tr>
+            <th scope="col" className="fc-corner"><span>What your plant needs</span><small>Illustrative coverage →</small></th>
+            {data.columns.map(([h, sub], i) => (
+              <th key={h} scope="col" className={i === 0 ? "fh" : undefined}>
+                <span className="fc-th">{h}</span>
+                <span className="fc-th-sub" dangerouslySetInnerHTML={{ __html: sub }} />
+                <span className="fc-cov" aria-hidden="true"><i style={{ "--w": data.coverage[i], "--c": i }} /></span>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.rows.map((r, ri) => (
+            <tr key={r.need}>
+              <th scope="row"><span className="fc-idx" aria-hidden="true">{String(ri + 1).padStart(2, "0")}</span><span>{r.need}</span></th>
+              {r.cells.map((c, ci) => (
+                <td key={ci} className={ci === 0 ? "fh" : undefined} style={{ "--r": ri, "--c": ci }}>
+                  <Glyph level={c.l} mark={r.mark} label={data.columns[ci][0]} />
+                  <span className="fc-lbl">{data.columns[ci][0]}</span>
+                  <span className="fc-t">{c.t}</span>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="fc-key" aria-hidden="true">
+        <span><i className="fc-g l2 sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></i>Built in</span>
+        <span><i className="fc-g l1 sm"></i>Partly / varies by product</span>
+        <span><i className="fc-g l0 sm"></i>Not typical</span>
+      </div>
+    </div>
+  );
+}
+
 function Lane({ lane, step, factory }) {
   const last = Math.max(0, lane.steps.length - 1);
   return (
@@ -82,28 +138,7 @@ export default function Compare({ data }) {
           </div>
 
           <div role="tabpanel" id="fh-panel-table" aria-labelledby="fh-view-table" hidden={view !== "table"}>
-            <div className="fc-table-help"><span>Compare the approach across your plant’s needs.</span><span>Scroll sideways to see all columns ↔</span></div>
-            <div className="fc-table-shell"><div className="fc-table-scroll" role="region" aria-label="Comparison table: scroll horizontally to view all five approaches" tabIndex={0}>
-              <table>
-                <caption className="sr">Industryhead proposed scope compared with OEE dashboards, manual tools, ERP add-ons and sensor-first OEE or MES platforms. Categories overlap and individual products vary.</caption>
-                <thead><tr>
-                  <th scope="col">What your plant needs</th>
-                  {data.columns.map(([h, sub], i) => (
-                    <th key={h} scope="col" className={i === 0 ? "fh" : undefined}><span className="fc-th">{h}</span><span className="fc-th-sub" dangerouslySetInnerHTML={{ __html: sub }} /></th>
-                  ))}
-                </tr></thead>
-                <tbody>
-                  {data.rows.map((r) => (
-                    <tr key={r.need}>
-                      <th scope="row">{r.need}</th>
-                      <td className="fh"><span className="fc-cell"><i className="fc-check" aria-hidden="true">{r.mark}</i><span>{r.cells[0]}</span></span></td>
-                      {r.cells.slice(1).map((c, i) => <td key={i} dangerouslySetInnerHTML={{ __html: c }} />)}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div></div>
-            <div className="fc-table-legend"><span><i className="fc-check" aria-hidden="true">✓</i> Industryhead product scope &nbsp; <i className="fc-check" aria-hidden="true">↗</i> Specialist extensions</span><span>OEE dashboards = reporting layer; OEE / MES = wider connected platform.</span></div>
+            <Matrix data={data} active={view === "table"} />
           </div>
           <p className="fc-note">{data.note}</p>
         </section>
