@@ -1,7 +1,7 @@
 import { test, before, after, describe } from "node:test";
 import assert from "node:assert/strict";
 import { PGlite } from "@electric-sql/pglite";
-import { sqliteStore, postgresStore, unconfiguredStore } from "../src/store.js";
+import { sqliteStore, postgresStore, unconfiguredStore, postgresUrlFromEnv } from "../src/store.js";
 import { createApp } from "../src/app.js";
 
 const TOKEN = "test-token";
@@ -28,6 +28,11 @@ for (const [name, make] of stores) {
     let s;
     before(async () => { s = await start(await make()); });
     after(() => s.close());
+
+    test("health?db=1 reports a working database", async () => {
+      const h = await (await s.j("/api/health?db=1")).json();
+      assert.equal(h.ok, true); assert.equal(h.db, "ok");
+    });
 
     test("content endpoint serves the layers, stages, chain and comparison", async () => {
       const c = await (await s.j("/api/content")).json();
@@ -100,6 +105,18 @@ describe("api basics", () => {
   test("unknown api route is a JSON 404", async () => { const r = await s.j("/api/nope"); assert.equal(r.status, 404); assert.ok((await r.json()).error); });
 });
 
+describe("postgres that cannot be reached", () => {
+  let s;
+  before(async () => { const failing = async () => { const e = new Error("getaddrinfo ENOTFOUND secret-host.example"); e.code = "ENOTFOUND"; throw e; }; s = await start(postgresStore(failing)); });
+  after(() => s.close());
+  test("reports the cause code, hides the host, and visitors get a generic 503", async () => {
+    const h = await (await s.j("/api/health?db=1")).json();
+    assert.equal(h.db, "error"); assert.match(h.detail, /ENOTFOUND/); assert.ok(!JSON.stringify(h).includes("secret-host"));
+    const r = await s.j("/api/tour", { headers: { "x-demo-session": "session-aaaaaaaa" } });
+    assert.equal(r.status, 503); const body = await r.json(); assert.ok(!JSON.stringify(body).includes("ENOTFOUND") && !JSON.stringify(body).includes("secret-host"));
+  });
+});
+
 describe("vercel without a database", () => {
   let s;
   before(async () => { s = await start(unconfiguredStore()); });
@@ -110,5 +127,15 @@ describe("vercel without a database", () => {
     const r = await s.j("/api/enquiries", { method: "POST", body: good() });
     assert.equal(r.status, 503); assert.match((await r.json()).error, /DATABASE_URL/);
     assert.equal((await s.j("/api/tour", { headers: { "x-demo-session": "session-aaaaaaaa" } })).status, 503);
+  });
+});
+
+describe("finding the Postgres URL in the environment", () => {
+  test("DATABASE_URL and POSTGRES_URL win; prefixed integration names are found; pooled beats unpooled", () => {
+    assert.equal(postgresUrlFromEnv({ DATABASE_URL: "postgres://a", POSTGRES_URL: "postgres://b" }), "postgres://a");
+    assert.equal(postgresUrlFromEnv({ POSTGRES_URL: "postgres://b" }), "postgres://b");
+    assert.equal(postgresUrlFromEnv({ STORAGE_URL: "postgresql://pooled", STORAGE_URL_NON_POOLING: "postgres://direct", ADMIN_TOKEN: "x" }), "postgresql://pooled");
+    assert.equal(postgresUrlFromEnv({ STORAGE_DATABASE_URL_UNPOOLED: "postgres://direct", STORAGE_DATABASE_URL: "postgres://pooled" }), "postgres://pooled");
+    assert.equal(postgresUrlFromEnv({ ADMIN_TOKEN: "postgres-is-not-a-url", OTHER: "https://x" }), undefined);
   });
 });

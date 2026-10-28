@@ -12,8 +12,17 @@ const iso = (v) => (v instanceof Date ? v.toISOString() : v);
 const normRow = (r) => (r ? { ...r, created_at: iso(r.created_at) } : r);
 
 /** Postgres over any `query(sql, params) => rows` function (pg Pool, PGlite in tests). */
-export function postgresStore(query, { close } = {}) {
+export function postgresStore(rawQuery, { close } = {}) {
   let ready;
+  const query = async (sql, params) => {
+    try { return await rawQuery(sql, params); }
+    catch (e) {
+      console.error("[store] postgres query failed:", e); // full detail goes to the server log only
+      const err = new Error(`Database unavailable (${e.code || e.name || "error"})`);
+      err.status = 503; err.dbCode = e.code || e.name || "error";
+      throw err;
+    }
+  };
   const init = () => (ready ??= (async () => {
     await query(`CREATE TABLE IF NOT EXISTS enquiries (
       id SERIAL PRIMARY KEY, reference TEXT NOT NULL UNIQUE, name TEXT NOT NULL, email TEXT NOT NULL, company TEXT NOT NULL,
@@ -26,6 +35,7 @@ export function postgresStore(query, { close } = {}) {
 
   return {
     kind: "postgres",
+    async ping() { await init(); await query("SELECT 1"); },
     async createEnquiry(e) {
       await init(); const reference = newReference();
       const rows = await query(`INSERT INTO enquiries (${COLS}) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`, vals(e, reference));
@@ -87,6 +97,7 @@ export async function sqliteStore(path) {
   `);
   return {
     kind: "sqlite",
+    async ping() { db.prepare("SELECT 1").get(); },
     async createEnquiry(e) {
       const reference = newReference();
       const r = db.prepare(`INSERT INTO enquiries (${COLS}) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`).run(...vals(e, reference));
@@ -119,12 +130,25 @@ export async function sqliteStore(path) {
 /** Vercel without a database: everything that needs storage answers 503 with a clear message. */
 export function unconfiguredStore() {
   const fail = async () => { const e = new Error("Storage is not configured: set DATABASE_URL (Postgres) in the Vercel project settings."); e.status = 503; throw e; };
-  return { kind: "unconfigured", createEnquiry: fail, listEnquiries: fail, setEnquiryStatus: fail, loadSession: fail, saveSession: fail, pruneSessions: async () => {}, close: async () => {} };
+  return { kind: "unconfigured", ping: fail, createEnquiry: fail, listEnquiries: fail, setEnquiryStatus: fail, loadSession: fail, saveSession: fail, pruneSessions: async () => {}, close: async () => {} };
+}
+
+/**
+ * Finds a Postgres connection string. DATABASE_URL / POSTGRES_URL win; otherwise any variable (for example the
+ * <PREFIX>_URL or <PREFIX>_DATABASE_URL that a Vercel storage integration creates with a custom prefix) whose value
+ * is a postgres:// URL. Pooled URLs are preferred over "unpooled / non-pooling" ones — better for serverless.
+ */
+export function postgresUrlFromEnv(env = process.env) {
+  if (env.DATABASE_URL) return env.DATABASE_URL;
+  if (env.POSTGRES_URL) return env.POSTGRES_URL;
+  const isPg = (v) => typeof v === "string" && /^postgres(ql)?:\/\//i.test(v);
+  const keys = Object.keys(env).filter((k) => isPg(env[k]) && !/PRISMA/i.test(k)).sort((a, b) => /UNPOOLED|NON_POOLING/i.test(a) - /UNPOOLED|NON_POOLING/i.test(b));
+  return keys.length ? env[keys[0]] : undefined;
 }
 
 /** Picks the store from the environment. */
 export async function storeFromEnv(env = process.env) {
-  const url = env.DATABASE_URL || env.POSTGRES_URL; // Neon / Vercel Postgres integrations set one or both
+  const url = postgresUrlFromEnv(env);
   if (url) return pgPoolStore(url);
   if (env.VERCEL) return unconfiguredStore();
   return sqliteStore(env.DB_PATH || new URL("../data/industryhead.db", import.meta.url).pathname);

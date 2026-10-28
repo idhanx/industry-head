@@ -26,7 +26,12 @@ export function createApp({ store, adminToken, staticDir, trustProxy = false, no
     industries: content.industries, services: content.services, steps: content.steps, trust: content.trust,
     form: { timezones: content.timezones, sites: content.sitesOptions, durations: content.durations }
   };
-  app.get("/api/health", (_req, res) => res.json({ ok: true, store: store.kind }));
+  // /api/health is a liveness check; /api/health?db=1 also tries the database and reports the failure code (never the connection string)
+  app.get("/api/health", async (req, res) => {
+    const out = { ok: true, store: store.kind };
+    if (req.query.db) { try { await store.ping(); out.db = "ok"; } catch (e) { out.db = "error"; out.detail = e.message; } }
+    res.json(out);
+  });
   app.get("/api/content", (_req, res) => { res.set("Cache-Control", "public, max-age=300"); res.json(publicContent); });
 
   // ---------- illustrative cost ticker ----------
@@ -124,7 +129,7 @@ export function createApp({ store, adminToken, staticDir, trustProxy = false, no
   }
 
   app.use((err, _req, res, _next) => {
-    if (err.status === 503) return res.status(503).json({ error: err.message });
+    if (err.status === 503) return res.status(503).json({ error: err.dbCode ? "The demo is temporarily unavailable. Please try again shortly." : err.message });
     if (err.type === "entity.parse.failed") return res.status(400).json({ error: "Invalid JSON." });
     if (err.type === "entity.too.large") return res.status(413).json({ error: "Request too large." });
     console.error(err);
