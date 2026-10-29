@@ -137,7 +137,7 @@ export function Footer() {
   return (
     <footer>
       <div className="wrap">
-        <a className="brand" href="#top" aria-label="Industryhead home"><span className="brand-mark" aria-hidden="true">ih</span><span><b>Industryhead</b><small>Decision intelligence for manufacturing</small></span></a>
+        <a className="brand" href="#top" aria-label="Industryhead home"><img src="/logo.png" alt="Industryhead" className="brand-logo" /></a>
         <nav aria-label="Footer"><a href="#transform">Before &amp; after</a><a href="#platform">Platform</a><a href="#method">Our method</a><a href="#compare">Compare</a><a href="#demo">Pricing &amp; demo</a></nav>
         <span>© {new Date().getFullYear()} Industryhead</span>
       </div>

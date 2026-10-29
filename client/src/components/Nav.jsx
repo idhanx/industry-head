@@ -5,8 +5,7 @@ const LINKS = [["#transform", "Before & after"], ["#tour", "Product tour"], ["#p
 export function BrandLockup() {
   return (
     <a className="brand" href="#top" aria-label="Industryhead home">
-      <span className="brand-mark" aria-hidden="true">ih</span>
-      <span><b>Industryhead</b><small>Decision intelligence for manufacturing</small></span>
+      <img src="/logo.png" alt="Industryhead" className="brand-logo" />
     </a>
   );
 }
@@ -24,8 +23,7 @@ export default function Nav({ scrolled, active }) {
     <header className={`nav${scrolled ? " scrolled" : ""}${open ? " open" : ""}`} id="nav">
       <div className="wrap">
         <a className="brand" href="#top" aria-label="Industryhead home">
-          <span className="brand-mark" aria-hidden="true">ih</span>
-          <span><b>Industryhead</b><small>Decision intelligence for manufacturing</small></span>
+          <img src="/logo.png" alt="Industryhead" className="brand-logo" />
         </a>
         <nav className="menu" aria-label="Sections">
           {links.map((l) => <a key={l.h} href={l.h} className={active === l.h.slice(1) ? "on" : undefined}>{l.t}</a>)}

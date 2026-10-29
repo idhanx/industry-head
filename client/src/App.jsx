@@ -7,6 +7,7 @@ import Transform from "./components/Transform.jsx";
 import Problem from "./components/Problem.jsx";
 import Tour from "./components/Tour.jsx";
 import Platform from "./components/Platform.jsx";
+import Suite from "./components/Suite.jsx";
 import Method from "./components/Method.jsx";
 import Chain from "./components/Chain.jsx";
 import Compare from "./components/Compare.jsx";
@@ -69,6 +70,7 @@ function Site() {
           {(c) => (
             <Loaded onMount={() => setLoaded(true)}>
               <Platform features={c.features} />
+              <Suite />
               <Method stages={c.stages} />
               <Chain chain={c.chain} />
               <Compare data={c.comparison} />
